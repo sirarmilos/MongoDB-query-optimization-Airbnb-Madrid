@@ -1,0 +1,21 @@
+// Upit 1
+db['listings_final'].createIndex({'available_dates' : 1, 'neighbourhood_group' : 1})
+// vreme izvršavanja - 0.004 sekunde
+
+// Upit 2
+db['listings_detailed_final'].createIndex({neighbourhood_cleansed : 1, 'room_type' : 1, available_dates : 1})
+// vreme izvršavanja - 0.001 sekunde
+
+// Upit 3
+db['listings_detailed_final'].createIndex({'available_dates' : 1, 'bathrooms_text' : 1, 'bedrooms' : 1})
+// vreme izvršavanja - 0.001 sekunde
+
+// Upit 4
+db['listings_final'].createIndex({'available_dates' : 1, 'id' : 1})
+// vreme izvršavanja - 0.003 sekundi
+
+// Upit 5
+db['reviews_detailed'].createIndex({'date' : 1, 'listing_id' : 1})
+db['listings_detailed_final'].createIndex({'id' : 1, 'host_response_time' : 1, 'host_response_rate' : 1})
+// vreme izvršavanja - 0.719 sekundi
+

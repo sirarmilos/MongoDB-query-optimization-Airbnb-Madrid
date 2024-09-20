@@ -1,0 +1,241 @@
+// Upit 1: Za svaki sektor Madrida odrediti koliko je slobodno smeštaja na dan 15.04.2021.?
+
+db.getCollection("calendar_4").aggregate([
+        {
+            $match : { $and : [
+                {"date" : "2021-04-15"}, 
+                {"available" : "t"}]
+            }
+        },
+        {
+            $lookup:
+            {
+                from : "listings",
+                localField : "listing_id",
+                foreignField: "id",
+                as : "listing_info"
+            }
+        },
+        {
+            $unwind : "$listing_info"
+        },
+        {
+            $group : {
+                "_id" : "$listing_info.neighbourhood_group",
+                count : { $sum : 1},
+                date : { "$first" : "$date"},
+                neighbourhood_group: { $first: "$listing_info.neighbourhood_group" },
+                available : { $first : "$available"}
+            }
+        },
+        {
+            $project: {
+                _id: 0, // Sakriva _id
+                count : 1,
+                date : 1,
+                neighbourhood_group: 1,
+                available : 1
+            }
+        }
+])
+
+// vreme izvršavanja - 32.858 sekunde
+
+// Upit 2: Koliko je Private room tipova sobe u sektoru Madrida Sol bilo slobodno na dan 01.05.2021.?
+
+db.getCollection("calendar_4").aggregate([
+        {
+            $match : { $and : [
+                {"date" : "2021-05-01"},
+                {"available" : "t"}]
+            }
+        },
+        {
+            $lookup:
+            {
+                from : "listings_detailed",
+                localField : "listing_id",
+                foreignField: "id",
+                as : "listings_info"
+            }
+        },
+        {
+            $unwind : "$listings_info"
+        },
+        {
+            $match : {
+                $and : [
+                { "listings_info.neighbourhood_cleansed" : "Sol"},
+                { "listings_info.room_type" : "Private room"}]
+            }
+        },
+        {
+            $count: "total_rows"   
+        }
+])
+
+// rezultat je 129
+// vreme izvršavanja - 1 minut i 47.712 sekundi - 107.712 sekundi
+
+// Upit 3. Prikazati smeštaje koji imaju do 2 kupatila, ako imaju 1 ili 2 sobe, i slobodni su 01.05.2021.
+
+db.calendar_4.aggregate([
+        {
+            $match : { $and : [
+                {"date" : "2021-05-01"},
+                {"available" : "t"}]
+            }
+        },
+        {
+            $lookup:
+            {
+                from : "listings_detailed",
+                localField : "listing_id",
+                foreignField: "id",
+                as : "listings_info"
+            }
+        },
+        {
+            $unwind : "$listings_info"
+        },
+        {
+            $sort : {"date" : 1}
+        },
+        {
+            $match : {
+                $and : [
+                {"listings_info.bathrooms_text" : {$in : ["1 shared bath", "1 bath", 
+                    "1 private batch", "1.5 shared baths", "2 baths", "2 shared baths"
+                    ]}},
+                {"listings_info.bedrooms" : {$in : [1, 2]}}]
+            }
+        },
+        {
+        $project: {
+            _id: 0, // Sakriva _id
+            listing_id: 1,
+            "listings_info.name" : 1,
+            "listings_info.host_name" : 1,
+            "listings_info.neighbourhood_group_cleansed" : 1,
+            "listings_info.neighbourhood_cleansed": 1,
+            "listings_info.room_type" : 1,
+            "listings_info.bathrooms_text" : 1,
+            "listings_info.bedrooms" : 1,
+            date : 1
+        }
+    },
+])
+
+// vreme izvršavanja - 1 minut i 45.454 sekundi - 105.454 sekundi
+
+// Upit 4: Prikazati smeštaje koji su slobodni 01.05.2021., a kojima je cena veća od 100 dolara po noćenju.
+
+db.getCollection("calendar_4").aggregate([
+        {
+            $match : { $and : [
+                {"date" : "2021-05-01"}, 
+                {"available" : "t"}]
+            }  
+        },
+        {
+            $lookup:
+            {
+                from : "listings",
+                localField : "listing_id",
+                foreignField: "id",
+                as : "listing_info"
+            }
+        },
+        {
+            $unwind : "$listing_info"
+        },
+        {
+            $match : {
+                "listing_info.price" : { $gt : 100}
+            }
+        },
+        {
+            $sort : {
+                "listing_info.id" : 1
+            }
+        },
+        {
+            $project: {
+                _id: 0, // Sakriva _id
+                listing_id: 1,
+                "listing_info.count" : 1,
+                "listing_info.name" : 1,
+                "listing_info.host_name" : 1,
+                "listing_info.neighbourhood_group" : 1,
+                "listing_info.neighbourhood" : 1,
+                "listing_info.room_type" : 1
+            }
+        }
+])
+
+// vreme izvršavanja - 1 minuta i 42.748 sekundi - 102.748 sekundi
+
+// Upit 5: Broj komentara za svaki od smeštaja u periodu od 12.03.2021. do 12.04.2021. koji imaju vreme odgovora vlasnika u roku od jednog dana i procenat odgovora 90% ili više.
+
+db.getCollection("reviews_detailed").aggregate([
+        {
+            $match : {
+                $and : [
+                    {"date" : {$gte : "2021-03-12"}},
+                    {"date" : {$lte : "2021-04-12"}}
+                ]
+            }
+        },
+        {
+            $lookup:
+            {
+                from : "listings_detailed",
+                localField : "listing_id",
+                foreignField: "id",
+                as : "listings_info"
+            }
+        },
+        {
+            $unwind : "$listings_info"
+        },
+        {
+            $match : {
+                $and : [
+                { "listings_info.host_response_time" : { $in : ["within an hour",
+                    "within a few hours", "within a day"] } },
+                {"listings_info.host_response_rate" : {$in : ["100%", "99%", "98%",
+                    "97%", "96%", "95%", "94%", "93%", "92%", "91%", "90%"]}}]
+            }
+        },
+        {
+            $group : {
+                "_id" : "$listing_id",
+                count : { $sum : 1 },
+		listing_id : { $first : "$listings_info.id" },
+                name : { $first : "$listings_info.name" },
+                host_name : { $first : "$listings_info.host_name"},
+                neighbourhood_group_cleansed: { $first: "$listings_info.neighbourhood_group_cleansed" },
+                neighbourhood_cleansed : { $first : "$listings_info.neighbourhood_cleansed"},
+                room_type : { $first : "$listings_info.room_type"},
+                host_response_time : { $first : "$listings_info.host_response_time"},
+                host_response_rate : { $first : "$listings_info.host_response_rate"}
+                }
+        },
+        {    
+            $project: {
+                _id: 0, // Sakriva _id
+                listing_id: 1,
+                count : 1,
+                name : 1,
+                host_name : 1,
+                neighbourhood_group_cleansed : 1,
+                neighbourhood_cleansed: 1,
+                room_type : 1,
+                host_response_time : 1,
+                host_response_rate : 1
+            }
+        }
+])
+
+// vreme izvršavanja - 1 minut i 14.759 sekundi - 74.759 sekundi
+

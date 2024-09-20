@@ -1,0 +1,16 @@
+- import_script_1.py
+	- importovanje baza podataka u MongoDB na početku
+	- odmah je importovan i calendar_4, koji se kreirao u analiza_2.py, i on predstavlja šablon podskupa
+
+- import_script_2.py
+	- importovanje baze podataka u MongoDB nakon restruktuiranja šeme baze podataka
+	- ovde je realizovan šablon proširene reference između calendar i listings i listings_detailed
+	- kreirane nove kolekcije pod nazivima listings_final i listings_detailed_final
+	- kreiran je i šablon proračunavanja sa poljem avg_price
+	- zatim je kreirana nova baza podataka u MongoDB pod nazivom mydatabase_optimized
+	- nad ovakvom bazom podataka su kasnije korišćeni indeksi
+
+- analiza_2.py
+	- python skripta koja je kreirana za brze provere, kako upita, tako i delova upita i baze podataka
+	- ovde je kreiran i šablon podskupa
+
