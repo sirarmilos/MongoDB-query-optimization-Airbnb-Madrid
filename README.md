@@ -31,11 +31,6 @@ Projekat se sastoji iz nekoliko celina:
 6. Metabase
 	- Pomoću Metabase alata na kraju je na elegantan i reprezentativan način prikazao svaki od upita, tako da osobi kojoj se prezentuje ovaj problem olakša shvatanje istog.
 
-
-Detaljnije informacije o svakoj celini i koraku, kao i o rezultatima nalaze se u okviru repozitorijuma.
-
-Pregled prezentacije i izveštaja daje celokupnu sliku o projektu.
-
 Za detaljniji opis i uvid u realizaciju projekta, možete pogledati u foldere u okviru ovog repozitorijuma:
 
 1. Folder explain_plan - sadrži explain_plan za svaki upit pre i posle optimizacija
